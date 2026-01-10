@@ -1,4 +1,6 @@
 import { getMigrationById } from "@/lib/db/migrations";
+import { streamManager } from "@/lib/services/migration/streamManager";
+import type { StreamEvent } from "@/types";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -9,8 +11,10 @@ export async function GET(request: Request, { params }: RouteContext) {
 
   // Create a readable stream for SSE
   const encoder = new TextEncoder();
+  let unsubscribe: (() => void) | null = null;
   let intervalId: NodeJS.Timeout | null = null;
   let lastLogCount = 0;
+  let isClosed = false;
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -32,20 +36,35 @@ export async function GET(request: Request, { params }: RouteContext) {
             status: migration.status,
             currentAgent: migration.currentAgent,
             logs: migration.logs,
+            plan: migration.plan,
           })}\n\n`
         )
       );
       lastLogCount = migration.logs.length;
 
-      // Poll for updates every 2 seconds
+      // Subscribe to real-time stream events
+      unsubscribe = streamManager.subscribe(id, (event: StreamEvent) => {
+        if (isClosed) return;
+        try {
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify(event)}\n\n`)
+          );
+        } catch (error) {
+          console.error("[Stream API] Error sending event:", error);
+        }
+      });
+
+      // Also poll for log updates and status changes every 2 seconds
+      // This catches any events that might be missed
       intervalId = setInterval(async () => {
+        if (isClosed) return;
         try {
           const updated = await getMigrationById(id);
           if (!updated) {
             controller.enqueue(
               encoder.encode(`data: ${JSON.stringify({ error: "Migration not found" })}\n\n`)
             );
-            if (intervalId) clearInterval(intervalId);
+            cleanup();
             controller.close();
             return;
           }
@@ -53,29 +72,21 @@ export async function GET(request: Request, { params }: RouteContext) {
           // Send new logs if any
           if (updated.logs.length > lastLogCount) {
             const newLogs = updated.logs.slice(lastLogCount);
-            controller.enqueue(
-              encoder.encode(
-                `data: ${JSON.stringify({
-                  type: "logs",
-                  logs: newLogs,
-                })}\n\n`
-              )
-            );
+            for (const log of newLogs) {
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({
+                    type: "log",
+                    level: log.level,
+                    message: log.message,
+                    agent: log.agent,
+                    timestamp: log.timestamp,
+                  })}\n\n`
+                )
+              );
+            }
             lastLogCount = updated.logs.length;
           }
-
-          // Send status update
-          controller.enqueue(
-            encoder.encode(
-              `data: ${JSON.stringify({
-                type: "status",
-                status: updated.status,
-                currentAgent: updated.currentAgent,
-                plan: updated.plan,
-                result: updated.result,
-              })}\n\n`
-            )
-          );
 
           // Close stream if migration is complete or failed
           if (updated.status === "completed" || updated.status === "failed") {
@@ -88,26 +99,24 @@ export async function GET(request: Request, { params }: RouteContext) {
                 })}\n\n`
               )
             );
-            if (intervalId) clearInterval(intervalId);
+            cleanup();
             controller.close();
           }
         } catch (error) {
-          console.error("[Stream API] Error:", error);
-          controller.enqueue(
-            encoder.encode(
-              `data: ${JSON.stringify({
-                type: "error",
-                error: error instanceof Error ? error.message : "Unknown error",
-              })}\n\n`
-            )
-          );
+          console.error("[Stream API] Poll error:", error);
         }
       }, 2000);
+
+      function cleanup() {
+        isClosed = true;
+        if (unsubscribe) unsubscribe();
+        if (intervalId) clearInterval(intervalId);
+      }
     },
     cancel() {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
+      isClosed = true;
+      if (unsubscribe) unsubscribe();
+      if (intervalId) clearInterval(intervalId);
     },
   });
 

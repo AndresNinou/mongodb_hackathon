@@ -953,6 +953,71 @@ html {
   scroll-behavior: smooth;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   AGENT CHAT ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Tool card running animation - pulsing glow */
+.tool-card-running {
+  animation: tool-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes tool-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(0, 212, 255, 0);
+  }
+}
+
+/* Streaming text fade-in */
+.stream-chunk {
+  animation: stream-in 0.15s ease-out;
+}
+
+@keyframes stream-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Typing cursor animation */
+.typing-cursor {
+  animation: cursor-blink 0.8s ease-in-out infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Message bubble animations */
+.message-enter {
+  animation: message-slide-in 0.2s ease-out;
+}
+
+@keyframes message-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tool status transition */
+.tool-status-transition {
+  transition: all 0.3s ease-out;
+}
+
 /* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -33,6 +33,16 @@ export interface MigrationResult {
   summary?: string;
 }
 
+// Stream event types for real-time agent UI
+export type StreamEvent =
+  | { type: "text"; content: string }
+  | { type: "tool_start"; id: string; name: string; args: Record<string, unknown> }
+  | { type: "tool_result"; id: string; success: boolean; output?: string; error?: string }
+  | { type: "status"; status: MigrationStatus; agent: 1 | 2 | null }
+  | { type: "log"; level: string; message: string; agent: number | null }
+  | { type: "user_message"; content: string }
+  | { type: "agent_message"; content: string };
+
 export interface Migration {
   _id: ObjectId;
   migrationId: string;
@@ -44,6 +54,7 @@ export interface Migration {
   result?: MigrationResult;
   logs: MigrationLog[];
   repoPath?: string;
+  sessionId?: string; // ACP session ID for interactive chat
   createdAt: Date;
   updatedAt: Date;
 }
@@ -60,6 +71,7 @@ export interface MigrationUpdate {
   plan?: Record<string, unknown>;
   result?: MigrationResult;
   repoPath?: string;
+  sessionId?: string;
 }
 
 export interface MigrationResponse {
