@@ -1,4 +1,4 @@
-![Mongrate - AI-Powered Database Migration](./public/og.png)
+![Mongrate - AI-Powered Database Migration](./public/logo.png)
 
 # Mongrate
 
