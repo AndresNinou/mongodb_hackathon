@@ -51,9 +51,14 @@ export default function HomePage() {
     name: string;
     repoUrl: string;
     branch?: string;
-    postgresUrl?: string;
-    mongoUrl: string;
+    supabaseUrl?: string;
+    supabaseProjectId?: string;
+    supabaseAnonKey?: string;
+    mongoUrl?: string;
     githubToken?: string;
+    useDefaultMongo?: boolean;
+    useDefaultGithub?: boolean;
+    useDefaultSupabase?: boolean;
   }) => {
     const res = await fetch("/api/migrations", {
       method: "POST",
@@ -63,9 +68,19 @@ export default function HomePage() {
         config: {
           repoUrl: data.repoUrl,
           branch: data.branch,
-          postgresUrl: data.postgresUrl,
+          // MongoDB - use provided value or signal to use default
           mongoUrl: data.mongoUrl,
+          useDefaultMongo: data.useDefaultMongo,
+          // Supabase configuration
+          supabase: !data.useDefaultSupabase && data.supabaseUrl ? {
+            url: data.supabaseUrl,
+            projectId: data.supabaseProjectId,
+            anonKey: data.supabaseAnonKey,
+          } : undefined,
+          useDefaultSupabase: data.useDefaultSupabase,
+          // GitHub token
           githubToken: data.githubToken,
+          useDefaultGithub: data.useDefaultGithub,
         },
       }),
     });

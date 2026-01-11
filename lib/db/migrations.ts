@@ -5,6 +5,7 @@ import type {
   MigrationUpdate,
   MigrationResponse,
   MigrationLog,
+  ChatMessage,
 } from "@/types";
 import { randomUUID } from "crypto";
 import path from "path";
@@ -203,4 +204,73 @@ export async function ensureMigrationIndexes(): Promise<void> {
   } catch (error) {
     console.error("[MongoDB] Failed to ensure migration indexes:", error);
   }
+}
+
+// Chat message persistence
+export async function getChatMessages(
+  migrationId: string
+): Promise<ChatMessage[]> {
+  const collection = await getMigrationsCollection();
+  const migration = await collection.findOne(
+    { migrationId },
+    { projection: { chatMessages: 1 } }
+  );
+  return migration?.chatMessages || [];
+}
+
+export async function addChatMessage(
+  migrationId: string,
+  message: Omit<ChatMessage, "timestamp"> & { timestamp?: Date }
+): Promise<void> {
+  const collection = await getMigrationsCollection();
+  const now = new Date();
+
+  await collection.updateOne(
+    { migrationId },
+    {
+      $push: {
+        chatMessages: {
+          ...message,
+          timestamp: message.timestamp || now,
+        },
+      },
+      $set: { updatedAt: now },
+    }
+  );
+}
+
+export async function updateChatMessage(
+  migrationId: string,
+  messageId: string,
+  updates: Partial<ChatMessage>
+): Promise<void> {
+  const collection = await getMigrationsCollection();
+  const now = new Date();
+
+  // Update the specific message in the array
+  await collection.updateOne(
+    { migrationId, "chatMessages.id": messageId },
+    {
+      $set: {
+        "chatMessages.$.content": updates.content,
+        "chatMessages.$.tools": updates.tools,
+        updatedAt: now,
+      },
+    }
+  );
+}
+
+export async function clearChatMessages(migrationId: string): Promise<void> {
+  const collection = await getMigrationsCollection();
+  const now = new Date();
+
+  await collection.updateOne(
+    { migrationId },
+    {
+      $set: {
+        chatMessages: [],
+        updatedAt: now,
+      },
+    }
+  );
 }

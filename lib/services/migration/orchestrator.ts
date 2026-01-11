@@ -12,6 +12,7 @@ import {
   MIGRATION_SYSTEM_PROMPT,
 } from "@/lib/agents/prompts";
 import { sessionManager } from "./sessionManager";
+import { broadcaster } from "./broadcaster";
 import type { Migration, MigrationStatus } from "@/types";
 
 const execAsync = promisify(exec);
@@ -81,7 +82,7 @@ export async function cloneRepository(
 // ACP command configuration - use full path to npx for nvm environments
 const NPX_PATH = "/home/andres/.config/nvm/versions/node/v20.19.6/bin/npx";
 const ACP_COMMAND = NPX_PATH;
-const ACP_ARGS = ["-y", "@anthropics/claude-code", "--acp"];
+const ACP_ARGS = ["-y", "@zed-industries/claude-code-acp"];
 
 /**
  * Get or create ACP provider for migration using session manager
@@ -155,16 +156,32 @@ export async function runPlanningAgent(
       message: "Connecting to Claude Code ACP...",
     });
 
+    // Broadcast initial status
+    broadcaster.broadcast(migrationId, {
+      type: "status",
+      agent: 1,
+      content: "Planner agent starting...",
+      status: "planning",
+    });
+
     const result = await streamText({
       model: provider.languageModel(),
       system: MIGRATION_SYSTEM_PROMPT,
       messages: [{ role: "user", content: prompt }],
-      tools: provider.tools,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      tools: provider.tools as any,
       onChunk: async ({ chunk }) => {
         // Handle text chunks
         if (chunk.type === "text-delta" && chunk.text) {
           fullResponse += chunk.text;
           onChunk?.(chunk.text);
+
+          // Broadcast text to subscribers
+          broadcaster.broadcast(migrationId, {
+            type: "text",
+            agent: 1,
+            content: chunk.text,
+          });
 
           // Log progress every 2 seconds to avoid flooding
           const now = Date.now();
@@ -177,6 +194,33 @@ export async function runPlanningAgent(
               message: `Agent: ...${preview}`,
             });
           }
+        }
+
+        // Handle tool calls
+        if (chunk.type === "tool-call") {
+          broadcaster.broadcast(migrationId, {
+            type: "tool-call",
+            agent: 1,
+            content: `Calling ${chunk.toolName}`,
+            toolName: chunk.toolName,
+            toolArgs: (chunk as { input?: unknown }).input as Record<string, unknown>,
+            toolStatus: "running",
+          });
+        }
+
+        // Handle tool results
+        if (chunk.type === "tool-result") {
+          broadcaster.broadcast(migrationId, {
+            type: "tool-result",
+            agent: 1,
+            content: `Tool completed: ${chunk.toolName}`,
+            toolName: chunk.toolName,
+            toolOutput: (() => {
+              const output = (chunk as { output?: unknown }).output;
+              return typeof output === "string" ? output : JSON.stringify(output);
+            })(),
+            toolStatus: "completed",
+          });
         }
       },
     });
@@ -224,6 +268,14 @@ export async function runPlanningAgent(
       message: "Planning completed",
     });
 
+    // Broadcast completion
+    broadcaster.broadcast(migrationId, {
+      type: "status",
+      agent: 1,
+      content: "Planning completed successfully!",
+      status: "plan_ready",
+    });
+
     return { success: true, output: fullResponse };
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : "Unknown error";
@@ -231,6 +283,14 @@ export async function runPlanningAgent(
       agent: 1,
       level: "error",
       message: `Planning failed: ${errorMsg}`,
+    });
+
+    // Broadcast error
+    broadcaster.broadcast(migrationId, {
+      type: "error",
+      agent: 1,
+      content: `Planning failed: ${errorMsg}`,
+      status: "failed",
     });
 
     await updateMigration(migrationId, { status: "failed", currentAgent: null });
@@ -288,16 +348,32 @@ export async function runExecutionAgent(
       message: "Connecting to Claude Code ACP for execution...",
     });
 
+    // Broadcast initial status
+    broadcaster.broadcast(migrationId, {
+      type: "status",
+      agent: 2,
+      content: "Builder agent starting...",
+      status: "executing",
+    });
+
     const result = await streamText({
       model: provider.languageModel(),
       system: MIGRATION_SYSTEM_PROMPT,
       messages: [{ role: "user", content: prompt }],
-      tools: provider.tools,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      tools: provider.tools as any,
       onChunk: async ({ chunk }) => {
         // Handle text chunks
         if (chunk.type === "text-delta" && chunk.text) {
           fullResponse += chunk.text;
           onChunk?.(chunk.text);
+
+          // Broadcast text to subscribers
+          broadcaster.broadcast(migrationId, {
+            type: "text",
+            agent: 2,
+            content: chunk.text,
+          });
 
           // Log progress every 2 seconds
           const now = Date.now();
@@ -310,6 +386,33 @@ export async function runExecutionAgent(
               message: `Agent: ...${preview}`,
             });
           }
+        }
+
+        // Handle tool calls
+        if (chunk.type === "tool-call") {
+          broadcaster.broadcast(migrationId, {
+            type: "tool-call",
+            agent: 2,
+            content: `Calling ${chunk.toolName}`,
+            toolName: chunk.toolName,
+            toolArgs: (chunk as { input?: unknown }).input as Record<string, unknown>,
+            toolStatus: "running",
+          });
+        }
+
+        // Handle tool results
+        if (chunk.type === "tool-result") {
+          broadcaster.broadcast(migrationId, {
+            type: "tool-result",
+            agent: 2,
+            content: `Tool completed: ${chunk.toolName}`,
+            toolName: chunk.toolName,
+            toolOutput: (() => {
+              const output = (chunk as { output?: unknown }).output;
+              return typeof output === "string" ? output : JSON.stringify(output);
+            })(),
+            toolStatus: "completed",
+          });
         }
       },
     });
@@ -365,6 +468,14 @@ export async function runExecutionAgent(
       message: "Execution completed",
     });
 
+    // Broadcast completion
+    broadcaster.broadcast(migrationId, {
+      type: "status",
+      agent: 2,
+      content: "Migration completed successfully!",
+      status: "completed",
+    });
+
     return { success: true, output: fullResponse };
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : "Unknown error";
@@ -372,6 +483,14 @@ export async function runExecutionAgent(
       agent: 2,
       level: "error",
       message: `Execution failed: ${errorMsg}`,
+    });
+
+    // Broadcast error
+    broadcaster.broadcast(migrationId, {
+      type: "error",
+      agent: 2,
+      content: `Execution failed: ${errorMsg}`,
+      status: "failed",
     });
 
     await updateMigration(migrationId, { status: "failed", currentAgent: null });
