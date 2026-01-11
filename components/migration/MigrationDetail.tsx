@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import {
   X,
   Play,
@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { AgentChatPanel } from "./AgentChatPanel";
 import { MigrationInfoPanel } from "./MigrationInfoPanel";
-import { ChatInput } from "./ChatInput";
 import type { MigrationResponse, MigrationStatus } from "@/types";
 
 interface MigrationDetailProps {
@@ -29,33 +28,6 @@ export function MigrationDetail({
   const [isStartingExecution, setIsStartingExecution] = useState(false);
   const [currentStatus, setCurrentStatus] = useState<MigrationStatus>(migration.status);
   const [currentAgent, setCurrentAgent] = useState<1 | 2 | null>(migration.currentAgent);
-
-  // Handle status changes from stream
-  const handleStatusChange = useCallback(
-    (status: MigrationStatus, agent: 1 | 2 | null) => {
-      setCurrentStatus(status);
-      setCurrentAgent(agent);
-      // Also trigger a refresh to get updated plan/result
-      if (status === "plan_ready" || status === "completed" || status === "failed") {
-        onRefresh();
-      }
-    },
-    [onRefresh]
-  );
-
-  // Send chat message to agent
-  const handleSendMessage = async (message: string) => {
-    const res = await fetch(`/api/migrations/${migration.migrationId}/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message }),
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error || "Failed to send message");
-    }
-  };
 
   const startPlanning = async () => {
     setIsStartingPlan(true);
@@ -84,12 +56,6 @@ export function MigrationDetail({
       setIsStartingExecution(false);
     }
   };
-
-  // Check if chat should be enabled
-  const isChatEnabled =
-    currentStatus === "planning" ||
-    currentStatus === "plan_ready" ||
-    currentStatus === "executing";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -174,22 +140,7 @@ export function MigrationDetail({
         <div className="flex-1 flex overflow-hidden">
           {/* Left Panel - Agent Chat (60%) */}
           <div className="w-3/5 flex flex-col border-r border-[var(--glass-border-subtle)]">
-            {/* Chat Messages */}
-            <AgentChatPanel
-              migrationId={migration.migrationId}
-              onStatusChange={handleStatusChange}
-            />
-
-            {/* Chat Input */}
-            <ChatInput
-              onSend={handleSendMessage}
-              disabled={!isChatEnabled}
-              placeholder={
-                isChatEnabled
-                  ? "Send a message to the agent..."
-                  : "Chat available when agent is active"
-              }
-            />
+            <AgentChatPanel migrationId={migration.migrationId} />
           </div>
 
           {/* Right Panel - Migration Info (40%) */}
