@@ -59,7 +59,8 @@ export async function POST(request: Request, { params }: RouteContext) {
       model: provider.languageModel(),
       includeRawChunks: true,
       messages: await convertToModelMessages(messages),
-      tools: provider.tools,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      tools: provider.tools as any,
       onError: (error) => {
         console.error("[Chat API] Stream error:", error);
       },
