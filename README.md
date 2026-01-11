@@ -1,69 +1,208 @@
-![Next.js with MongoDB](./public/og.png)
+![Mongrate - AI-Powered Database Migration](./public/og.png)
 
--> View demo: [nextjs.mongodb.com](https://nextjs.mongodb.com/?utm_campaign=devrel&utm_source=third-party-content&utm_medium=cta&utm_content=template-nextjs-mongodb&utm_term=jesse.hall)
+# Mongrate
 
-# Next.js with MongoDB
+**AI-Powered Database Migration from PostgreSQL to MongoDB**
 
-A minimal template for building full-stack React applications using Next.js, Vercel, and MongoDB.
+Mongrate is an intelligent migration platform that automates the process of migrating applications from PostgreSQL to MongoDB. Using AI agents powered by Claude, it analyzes your codebase, creates migration plans, transforms your schema and queries, and even generates pull requests with the changes.
 
-## Getting Started
+## ✨ Features
 
-Click the "Deploy" button to clone this repo, create a new Vercel project, setup the MongoDB integration, and provision a new MongoDB database:
+- 🤖 **AI-Powered Analysis** - Claude AI agents analyze your codebase and database schema
+- 🔄 **Automated Migration** - Automatic code transformation from PostgreSQL to MongoDB
+- 🎯 **Smart Schema Mapping** - Intelligent conversion of relational schemas to document models
+- 🌿 **Auto PR Creation** - Generates pull requests with migrated code on a new branch
+- 📊 **Real-time Progress** - Track migration status with live updates
+- 💬 **Interactive Chat** - Communicate with AI agents during the migration process
+- 🎨 **Modern UI** - Clean, accessible interface with dark mode support
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?demo-description=Minimal%20template%20for%20building%20full-stack%20React%20applications%20using%20Next.js%2C%20Vercel%2C%20and%20MongoDB.&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F4N50YqRe7FHsd0ysfGM8bC%2F1201fe6929b842ec3ee15ee036625471%2Fog.png&demo-title=MongoDB%20%26%20Next.js%20Starter%20Template%20&demo-url=https%3A%2F%2Fnextjs.mongodb.com%2F&products=%255B%257B%2522type%2522%253A%2522integration%2522%252C%2522protocol%2522%253A%2522storage%2522%252C%2522productSlug%2522%253A%2522atlas%2522%252C%2522integrationSlug%2522%253A%2522mongodbatlas%2522%257D%255D&project-name=MongoDB%20%26%20Next.js%20Starter%20Template%20&repository-name=mongo-db-and-next-js-starter-template&repository-url=https%3A%2F%2Fgithub.com%2Fmongodb-developer%2Fnextjs-template-mongodb&root-directories=List%20of%20directory%20paths%20for%20the%20directories%20to%20clone%20into%20projects&skippable-integrations=1)
+## 🚀 Getting Started
 
-## Local Setup
+### Prerequisites
+
+- Node.js 18+ and npm/pnpm
+- MongoDB Atlas account (or local MongoDB instance)
+- GitHub account and personal access token (for repository cloning and PR creation)
+- PostgreSQL database credentials (for source data migration)
 
 ### Installation
 
-Install the dependencies:
+1. Clone the repository:
+
+```bash
+git clone https://github.com/AndresNinou/mongodb_hackathon.git
+cd nextjs-template-mongodb
+```
+
+2. Install dependencies:
 
 ```bash
 npm install
+# or
+pnpm install
+```
+
+3. Create a `.env.local` file in the project root:
+
+```bash
+cp .env.example .env.local
+```
+
+4. Add your MongoDB connection string to `.env.local`:
+
+```env
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/<database>?retryWrites=true&w=majority
 ```
 
 ### Development
 
-#### Create a .env file in the project root
-
-```bash
-cp .env.example .env
-```
-
-#### Get your database URL
-
-Obtain the database connection string from the Cluster tab on the [MongoDB Atlas Dashboard](https://account.mongodb.com/account/login/?utm_campaign=devrel&utm_source=third-party-content&utm_medium=cta&utm_content=template-nextjs-mongodb&utm_term=jesse.hall).
-
-#### Add the database URL to the .env file
-
-Update the `.env` file with your database connection string:
-
-```txt
-MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/<database>?retryWrites=true&w=majority
-```
-
-#### Start the development server
+Start the development server:
 
 ```bash
 npm run dev
+# or
+pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📖 How It Works
 
-## Learn More
+### 1. Create a Migration
 
-To learn more about MongoDB, check out the MongoDB documentation:
+Click "New Migration" and provide:
+- **Name**: A descriptive name for your migration
+- **GitHub Repository URL**: The repo containing your PostgreSQL application
+- **Branch** (optional): Target branch (defaults to main)
+- **PostgreSQL URL**: Connection string for your source database
+- **MongoDB URL**: Connection string for your target database
+- **GitHub Token**: Personal access token for cloning and PR creation
 
-- [MongoDB Documentation](https://www.mongodb.com/docs/?utm_campaign=devrel&utm_source=third-party-content&utm_medium=cta&utm_content=template-nextjs-mongodb&utm_term=jesse.hall) - learn about MongoDB features and APIs
-- [MongoDB Node.js Driver](https://www.mongodb.com/docs/drivers/node/current/?utm_campaign=devrel&utm_source=third-party-content&utm_medium=cta&utm_content=template-nextjs-mongodb&utm_term=jesse.hall) - documentation for the official Node.js driver
+### 2. Planning Phase
 
-To learn more about Next.js, take a look at the following resources:
+The AI agent will:
+- Clone your repository
+- Analyze the codebase structure
+- Identify PostgreSQL queries and schema definitions
+- Create a comprehensive migration plan
+- Map relational tables to MongoDB collections
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial
+### 3. Execution Phase
 
-## Deploy on Vercel
+Once you approve the plan:
+- Code is automatically transformed
+- PostgreSQL queries are converted to MongoDB operations
+- Schema is migrated to document model
+- Data is transferred from PostgreSQL to MongoDB
+- Changes are committed to a new branch
 
-Commit and push your code changes to your GitHub repository to automatically trigger a new deployment.
+### 4. Review & Deploy
+
+- Review the generated pull request
+- Test the migrated code
+- Merge when ready
+
+## 🛠️ Configuration
+
+### Cross-Origin Development
+
+The application is configured to work with tunneling services like ngrok:
+
+```typescript
+// next.config.ts
+allowedDevOrigins: ['*']
+```
+
+This allows you to access your development server through ngrok or other tunneling services without CORS issues.
+
+### Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `MONGODB_URI` | MongoDB connection string | ✅ Yes |
+
+Per-migration configuration (provided through UI):
+- `repoUrl`: GitHub repository URL
+- `branch`: Target branch name
+- `postgresUrl`: PostgreSQL connection string
+- `mongoUrl`: MongoDB connection string
+- `githubToken`: GitHub personal access token
+
+## 🏗️ Project Structure
+
+```
+nextjs-template-mongodb/
+├── app/
+│   ├── api/
+│   │   └── migrations/          # Migration API endpoints
+│   ├── page.tsx                 # Main application page
+│   └── layout.tsx               # Root layout
+├── components/
+│   ├── migration/               # Migration UI components
+│   │   ├── MigrationCard.tsx
+│   │   ├── MigrationDetail.tsx
+│   │   ├── AgentChatPanel.tsx
+│   │   └── CreateMigrationModal.tsx
+│   ├── layout/                  # Layout components
+│   └── ui/                      # Reusable UI components
+├── lib/
+│   ├── db/                      # Database utilities
+│   ├── services/                # Business logic
+│   │   └── migration/
+│   │       ├── orchestrator.ts  # Migration orchestration
+│   │       └── sessionManager.ts
+│   └── agents/                  # AI agent prompts
+├── types/                       # TypeScript type definitions
+└── data/                        # Migration data and cloned repos
+```
+
+## 🎨 Tech Stack
+
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+- **Language**: TypeScript
+- **Database**: [MongoDB](https://www.mongodb.com/) with MongoDB Node.js Driver
+- **AI**: [Claude AI](https://www.anthropic.com/claude) (Anthropic API)
+- **Styling**: Tailwind CSS with custom brutal/neo-brutalist design
+- **UI Components**: Custom components + [Lucide Icons](https://lucide.dev/)
+
+## 🔐 Security Notes
+
+- Never commit `.env.local` or expose sensitive credentials
+- Use environment variables for all secrets
+- GitHub tokens should have minimal required permissions
+- Consider using read-only database connections for analysis phase
+
+## 📚 Learn More
+
+### MongoDB Resources
+- [MongoDB Documentation](https://www.mongodb.com/docs/)
+- [MongoDB Node.js Driver](https://www.mongodb.com/docs/drivers/node/current/)
+- [MongoDB Atlas](https://www.mongodb.com/atlas)
+
+### Next.js Resources
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Learn Next.js](https://nextjs.org/learn)
+- [Next.js API Routes](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)
+
+### AI Resources
+- [Anthropic Claude API](https://docs.anthropic.com/)
+- [Prompt Engineering Guide](https://www.promptingguide.ai/)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is part of the MongoDB Hackathon submission.
+
+## 🏆 MongoDB Hackathon 2026
+
+Built for the MongoDB Hackathon as a demonstration of AI-powered database migration capabilities.
+
+**Team**: AndresNinou  
+**Project**: Mongrate - AI Database Migration Platform
+
+---
+
+**Powered by Claude • MongoDB • Next.js**
