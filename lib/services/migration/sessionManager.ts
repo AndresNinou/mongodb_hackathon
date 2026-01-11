@@ -1,99 +1,126 @@
 import { createACPProvider, type ACPProvider } from "@mcpc-tech/acp-ai-provider";
 import type { ACPProviderSettings } from "@mcpc-tech/acp-ai-provider";
 
+interface SessionEntry {
+  provider: ACPProvider;
+  sessionId: string;
+  createdAt: number;
+}
+
 /**
  * Session Manager - Manages ACP provider instances per migration
  *
- * Enables interactive chat by persisting ACP sessions across multiple
- * streamText calls. Each migration can have one active session.
+ * Follows the official ACP multi-session management pattern:
+ * 1. Create provider with persistSession: true
+ * 2. Call initSession() to establish the session
+ * 3. Store provider keyed by migrationId
+ * 4. Use provider for subsequent streamText calls
  */
 class SessionManager {
-  private providers = new Map<string, ACPProvider>();
-  private sessionIds = new Map<string, string>();
+  private sessions = new Map<string, SessionEntry>();
 
   /**
-   * Get or create an ACP provider for a migration
+   * Get an existing session for a migration
    */
-  getOrCreate(migrationId: string, config: ACPProviderSettings): ACPProvider {
-    // If we have an existing provider, return it
-    const existing = this.providers.get(migrationId);
-    if (existing) {
-      return existing;
+  get(migrationId: string): SessionEntry | null {
+    return this.sessions.get(migrationId) || null;
+  }
+
+  /**
+   * Create a new session for a migration
+   * This initializes the ACP connection and returns the session ID
+   */
+  async createSession(
+    migrationId: string,
+    config: ACPProviderSettings
+  ): Promise<{ provider: ACPProvider; sessionId: string }> {
+    // Clean up any existing session first
+    if (this.sessions.has(migrationId)) {
+      this.cleanup(migrationId);
     }
 
-    // Create new provider with session persistence enabled
+    console.log("[SessionManager] Creating new session for:", migrationId);
+
+    // Create provider with session persistence enabled
     const provider = createACPProvider({
       ...config,
       persistSession: true,
     });
 
-    this.providers.set(migrationId, provider);
-    return provider;
+    // Initialize the session - this is critical!
+    console.log("[SessionManager] Calling initSession()...");
+    const session = await provider.initSession();
+    const sessionId = session.sessionId;
+    console.log("[SessionManager] Session initialized:", sessionId);
+
+    // Store the session
+    this.sessions.set(migrationId, {
+      provider,
+      sessionId,
+      createdAt: Date.now(),
+    });
+
+    return { provider, sessionId };
   }
 
   /**
-   * Get existing provider for a migration (returns null if not found)
+   * Get or create a session for a migration
+   * Returns existing session if available, otherwise creates new one
    */
-  get(migrationId: string): ACPProvider | null {
-    return this.providers.get(migrationId) || null;
-  }
+  async getOrCreate(
+    migrationId: string,
+    config: ACPProviderSettings
+  ): Promise<{ provider: ACPProvider; sessionId: string; isNew: boolean }> {
+    const existing = this.sessions.get(migrationId);
+    if (existing) {
+      console.log("[SessionManager] Using existing session:", existing.sessionId);
+      return {
+        provider: existing.provider,
+        sessionId: existing.sessionId,
+        isNew: false,
+      };
+    }
 
-  /**
-   * Store the session ID for a migration
-   */
-  setSessionId(migrationId: string, sessionId: string): void {
-    this.sessionIds.set(migrationId, sessionId);
+    const { provider, sessionId } = await this.createSession(migrationId, config);
+    return { provider, sessionId, isNew: true };
   }
 
   /**
    * Get the stored session ID for a migration
    */
   getSessionId(migrationId: string): string | null {
-    // First check our local cache
-    const cached = this.sessionIds.get(migrationId);
-    if (cached) return cached;
-
-    // Then check the provider
-    const provider = this.providers.get(migrationId);
-    if (provider) {
-      const id = provider.getSessionId();
-      if (id) {
-        this.sessionIds.set(migrationId, id);
-        return id;
-      }
-    }
-
-    return null;
+    const session = this.sessions.get(migrationId);
+    return session?.sessionId || null;
   }
 
   /**
    * Check if a migration has an active session
    */
   hasActiveSession(migrationId: string): boolean {
-    return this.providers.has(migrationId);
+    return this.sessions.has(migrationId);
   }
 
   /**
    * Cleanup a migration's session
    */
   cleanup(migrationId: string): void {
-    const provider = this.providers.get(migrationId);
-    if (provider) {
+    const session = this.sessions.get(migrationId);
+    if (session) {
       try {
-        provider.cleanup();
+        console.log("[SessionManager] Cleaning up session:", session.sessionId);
+        session.provider.cleanup();
       } catch (error) {
         console.error("[SessionManager] Cleanup error:", error);
       }
     }
-    this.providers.delete(migrationId);
-    this.sessionIds.delete(migrationId);
+    this.sessions.delete(migrationId);
   }
 
   /**
    * Cleanup all sessions
    */
   cleanupAll(): void {
-    for (const [migrationId] of this.providers) {
+    for (const [migrationId] of this.sessions) {
       this.cleanup(migrationId);
     }
   }
@@ -102,7 +129,7 @@ class SessionManager {
    * Get the number of active sessions
    */
   getActiveSessionCount(): number {
-    return this.providers.size;
+    return this.sessions.size;
   }
 }
 

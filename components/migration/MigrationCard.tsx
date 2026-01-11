@@ -20,47 +20,47 @@ const statusConfig: Record<
   }
 > = {
   pending: {
-    color: "text-[var(--text-tertiary)]",
-    bg: "bg-[var(--glass-frosted)]",
+    color: "text-brutal-gray-dark",
+    bg: "bg-brutal-gray-light dark:bg-brutal-gray",
     icon: Clock,
     label: "Pending",
   },
   cloning: {
-    color: "text-[var(--accent-cyan)]",
-    bg: "bg-[var(--accent-cyan)]/10",
+    color: "text-black",
+    bg: "bg-mongodb-green",
     icon: Loader2,
-    label: "Cloning...",
+    label: "Cloning",
     animate: true,
   },
   planning: {
-    color: "text-[var(--accent-purple)]",
-    bg: "bg-[var(--accent-purple)]/10",
+    color: "text-black",
+    bg: "bg-warning",
     icon: Loader2,
-    label: "Planning...",
+    label: "Planning",
     animate: true,
   },
   plan_ready: {
-    color: "text-[var(--accent-cyan)]",
-    bg: "bg-[var(--accent-cyan)]/10",
+    color: "text-black",
+    bg: "bg-mongodb-green",
     icon: FileCode,
     label: "Plan Ready",
   },
   executing: {
-    color: "text-[var(--accent-pink)]",
-    bg: "bg-[var(--accent-pink)]/10",
+    color: "text-black",
+    bg: "bg-warning",
     icon: Loader2,
-    label: "Executing...",
+    label: "Executing",
     animate: true,
   },
   completed: {
-    color: "text-[var(--accent-green)]",
-    bg: "bg-[var(--accent-green)]/10",
+    color: "text-black",
+    bg: "bg-success",
     icon: CheckCircle,
     label: "Completed",
   },
   failed: {
-    color: "text-red-400",
-    bg: "bg-red-500/10",
+    color: "text-white",
+    bg: "bg-error",
     icon: XCircle,
     label: "Failed",
   },
@@ -73,24 +73,20 @@ export function MigrationCard({ migration, onDelete, onSelect }: MigrationCardPr
   return (
     <div
       onClick={() => onSelect(migration.migrationId)}
-      className="project-card group cursor-pointer"
+      className="project-card group"
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           {/* Icon */}
-          <div className="relative">
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[var(--accent-purple)] to-[var(--accent-cyan)] opacity-30 blur-lg group-hover:opacity-50 transition-opacity" />
-            <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-[var(--accent-purple)] to-[var(--accent-cyan)] flex items-center justify-center overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent" />
-              <Database className="w-5 h-5 text-white relative z-10" />
-            </div>
+          <div className="relative w-12 h-12 bg-mongodb-green border-3 border-brutal-black dark:border-brutal-white flex items-center justify-center transition-all group-hover:shadow-brutal-sm">
+            <Database className="w-6 h-6 text-black" strokeWidth={3} />
           </div>
           <div>
-            <h3 className="font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent-cyan)] transition-colors">
+            <h3 className="font-black text-base uppercase tracking-tight">
               {migration.name}
             </h3>
-            <p className="text-xs text-[var(--text-quaternary)]">
+            <p className="text-xs text-brutal-gray-dark font-bold uppercase tracking-wide">
               {new Date(migration.createdAt).toLocaleDateString()}
             </p>
           </div>
@@ -102,29 +98,34 @@ export function MigrationCard({ migration, onDelete, onSelect }: MigrationCardPr
             e.stopPropagation();
             onDelete(migration.migrationId);
           }}
-          className="opacity-0 group-hover:opacity-100 w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-500/10 transition-all"
+          className="opacity-0 group-hover:opacity-100 w-9 h-9 border-2 border-brutal-black dark:border-brutal-white flex items-center justify-center text-foreground hover:bg-error hover:text-white hover:border-error transition-all"
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 className="w-4 h-4" strokeWidth={2.5} />
         </button>
       </div>
 
       {/* Repo info */}
-      <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] mb-3">
-        <GitBranch className="w-4 h-4 text-[var(--text-tertiary)]" />
-        <span className="truncate">{migration.config.repoUrl.replace("https://github.com/", "")}</span>
+      <div className="flex items-center gap-2 text-sm font-bold mb-4 text-brutal-gray-dark">
+        <GitBranch className="w-4 h-4" strokeWidth={2.5} />
+        <span className="truncate uppercase tracking-wide text-xs">
+          {migration.config.repoUrl.replace("https://github.com/", "")}
+        </span>
       </div>
 
       {/* Status */}
       <div className="flex items-center justify-between">
-        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${status.bg}`}>
+        <div className={`flex items-center gap-2 px-3 py-2 border-2 border-brutal-black dark:border-brutal-white ${status.bg} shadow-brutal-sm`}>
           <StatusIcon
             className={`w-4 h-4 ${status.color} ${status.animate ? "animate-spin" : ""}`}
+            strokeWidth={2.5}
           />
-          <span className={`text-sm font-medium ${status.color}`}>{status.label}</span>
+          <span className={`text-xs font-black uppercase tracking-wide ${status.color}`}>
+            {status.label}
+          </span>
         </div>
 
         {migration.currentAgent && (
-          <span className="text-xs text-[var(--text-quaternary)]">
+          <span className="text-xs font-bold uppercase text-brutal-gray-dark">
             Agent {migration.currentAgent}
           </span>
         )}
@@ -132,15 +133,15 @@ export function MigrationCard({ migration, onDelete, onSelect }: MigrationCardPr
 
       {/* Result */}
       {migration.result?.prUrl && (
-        <div className="mt-3 pt-3 border-t border-[var(--glass-border-subtle)]">
+        <div className="mt-4 pt-4 border-t-2 border-brutal-black dark:border-brutal-white">
           <a
             href={migration.result.prUrl}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="text-sm text-[var(--accent-cyan)] hover:underline"
+            className="text-sm font-bold text-mongodb-green-dark hover:text-mongodb-green underline decoration-2 underline-offset-2 uppercase tracking-wide"
           >
-            View Pull Request →
+            View PR →
           </a>
         </div>
       )}

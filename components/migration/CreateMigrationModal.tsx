@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, GitBranch, Database, Loader2, Sparkles } from "lucide-react";
+import { X, GitBranch, Database, Loader2, Plus } from "lucide-react";
 
 interface CreateMigrationModalProps {
   isOpen: boolean;
@@ -64,41 +64,37 @@ export function CreateMigrationModal({
       <div className="modal-backdrop absolute inset-0" onClick={onClose} />
 
       {/* Modal */}
-      <div className="modal-container relative w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+      <div className="modal-container relative w-full max-w-lg p-8 max-h-[90vh] overflow-y-auto scrollbar-brutal">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-frosted)] transition-all"
+          className="absolute top-4 right-4 w-10 h-10 border-2 border-brutal-black dark:border-brutal-white flex items-center justify-center hover:bg-error hover:text-white hover:border-error transition-all"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" strokeWidth={2.5} />
         </button>
 
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="relative">
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[var(--accent-purple)] to-[var(--accent-cyan)] opacity-50 blur-lg" />
-            <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-[var(--accent-purple)] to-[var(--accent-cyan)] flex items-center justify-center overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent" />
-              <Database className="w-5 h-5 text-white relative z-10" />
-            </div>
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-14 h-14 bg-mongodb-green border-3 border-brutal-black dark:border-brutal-white flex items-center justify-center shadow-brutal-md">
+            <Database className="w-7 h-7 text-black" strokeWidth={3} />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-[var(--text-primary)]">
+            <h2 className="text-2xl font-black uppercase tracking-tight">
               New Migration
             </h2>
-            <p className="text-sm text-[var(--text-tertiary)]">
+            <p className="text-sm font-bold text-brutal-gray-dark uppercase">
               PostgreSQL → MongoDB
             </p>
           </div>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Name */}
           <div>
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-[var(--text-secondary)] mb-2"
+              className="block text-sm font-bold uppercase tracking-wide text-foreground mb-2"
             >
               Migration Name
             </label>
@@ -108,7 +104,7 @@ export function CreateMigrationModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="My App Migration"
-              className="input-liquid"
+              className="brutal-input"
               autoFocus
               required
             />
@@ -118,10 +114,10 @@ export function CreateMigrationModal({
           <div>
             <label
               htmlFor="repoUrl"
-              className="block text-sm font-medium text-[var(--text-secondary)] mb-2"
+              className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-foreground mb-2"
             >
-              <GitBranch className="w-4 h-4 inline mr-1" />
-              GitHub Repository URL
+              <GitBranch className="w-4 h-4" strokeWidth={2.5} />
+              GitHub Repository
             </label>
             <input
               type="url"
@@ -129,7 +125,7 @@ export function CreateMigrationModal({
               value={repoUrl}
               onChange={(e) => setRepoUrl(e.target.value)}
               placeholder="https://github.com/user/repo"
-              className="input-liquid"
+              className="brutal-input"
               required
             />
           </div>
@@ -138,10 +134,10 @@ export function CreateMigrationModal({
           <div>
             <label
               htmlFor="branch"
-              className="block text-sm font-medium text-[var(--text-secondary)] mb-2"
+              className="block text-sm font-bold uppercase tracking-wide text-foreground mb-2"
             >
               Branch{" "}
-              <span className="text-[var(--text-quaternary)]">(optional)</span>
+              <span className="text-brutal-gray-dark text-xs">(optional)</span>
             </label>
             <input
               type="text"
@@ -149,7 +145,7 @@ export function CreateMigrationModal({
               value={branch}
               onChange={(e) => setBranch(e.target.value)}
               placeholder="main"
-              className="input-liquid"
+              className="brutal-input"
             />
           </div>
 
@@ -157,11 +153,11 @@ export function CreateMigrationModal({
           <div>
             <label
               htmlFor="postgresUrl"
-              className="block text-sm font-medium text-[var(--text-secondary)] mb-2"
+              className="block text-sm font-bold uppercase tracking-wide text-foreground mb-2"
             >
-              PostgreSQL Connection{" "}
-              <span className="text-[var(--text-quaternary)]">
-                (optional, for data migration)
+              PostgreSQL{" "}
+              <span className="text-brutal-gray-dark text-xs">
+                (optional, for data)
               </span>
             </label>
             <input
@@ -170,7 +166,7 @@ export function CreateMigrationModal({
               value={postgresUrl}
               onChange={(e) => setPostgresUrl(e.target.value)}
               placeholder="postgresql://user:pass@host:5432/db"
-              className="input-liquid font-mono text-sm"
+              className="brutal-input font-mono text-sm"
             />
           </div>
 
@@ -178,7 +174,7 @@ export function CreateMigrationModal({
           <div>
             <label
               htmlFor="mongoUrl"
-              className="block text-sm font-medium text-[var(--text-secondary)] mb-2"
+              className="block text-sm font-bold uppercase tracking-wide text-foreground mb-2"
             >
               MongoDB Connection
             </label>
@@ -188,7 +184,7 @@ export function CreateMigrationModal({
               value={mongoUrl}
               onChange={(e) => setMongoUrl(e.target.value)}
               placeholder="mongodb+srv://user:pass@cluster.mongodb.net/db"
-              className="input-liquid font-mono text-sm"
+              className="brutal-input font-mono text-sm"
               required
             />
           </div>
@@ -197,10 +193,10 @@ export function CreateMigrationModal({
           <div>
             <label
               htmlFor="githubToken"
-              className="block text-sm font-medium text-[var(--text-secondary)] mb-2"
+              className="block text-sm font-bold uppercase tracking-wide text-foreground mb-2"
             >
               GitHub Token{" "}
-              <span className="text-[var(--text-quaternary)]">
+              <span className="text-brutal-gray-dark text-xs">
                 (for private repos)
               </span>
             </label>
@@ -210,42 +206,36 @@ export function CreateMigrationModal({
               value={githubToken}
               onChange={(e) => setGithubToken(e.target.value)}
               placeholder="ghp_xxxxxxxxxxxx"
-              className="input-liquid font-mono text-sm"
+              className="brutal-input font-mono text-sm"
             />
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-4 py-2.5 rounded-xl text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-frosted)] transition-all disabled:opacity-50"
+              className="brutal-btn-ghost disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!name.trim() || !repoUrl.trim() || !mongoUrl.trim() || isSubmitting}
-              className="relative group flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white overflow-hidden transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="brutal-btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {/* Background */}
-              <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent-purple)] to-[var(--accent-cyan)] opacity-80 group-hover:opacity-100 transition-opacity" />
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent" />
-
-              <div className="relative flex items-center gap-2">
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" />
-                    Create Migration
-                  </>
-                )}
-              </div>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" strokeWidth={3} />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-5 h-5" strokeWidth={3} />
+                  Create
+                </>
+              )}
             </button>
           </div>
         </form>

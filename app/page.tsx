@@ -108,62 +108,51 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-1 container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16 animate-fade-in">
-          {/* Hero orb */}
-          <div className="relative w-24 h-24 mx-auto mb-8">
-            {/* Glow layers */}
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[var(--accent-purple)] via-[var(--accent-cyan)] to-[var(--accent-pink)] opacity-40 blur-3xl animate-float" />
-            <div className="absolute inset-2 rounded-2xl bg-gradient-to-br from-[var(--accent-purple)] via-[var(--accent-cyan)] to-[var(--accent-pink)] opacity-60 blur-xl" />
-            {/* Main orb */}
-            <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-[var(--accent-purple)] via-[var(--accent-cyan)] to-[var(--accent-pink)] flex items-center justify-center overflow-hidden shadow-lg">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-transparent" />
-              <Database className="w-12 h-12 text-white relative z-10" />
-            </div>
+          {/* Hero icon */}
+          <div className="relative w-24 h-24 mx-auto mb-8 bg-mongodb-green border-4 border-brutal-black dark:border-brutal-white flex items-center justify-center shadow-brutal-lg">
+            <Database className="w-12 h-12 text-black" strokeWidth={3} />
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 tracking-tight">
-            <span className="gradient-text-animated">PG → MongoDB</span>
+          <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight uppercase">
+            Mongrate
           </h1>
-          <p className="text-lg text-[var(--text-secondary)] max-w-xl mx-auto leading-relaxed">
-            AI-powered database migration from PostgreSQL to MongoDB.
+          <p className="text-xl font-bold text-brutal-gray-dark max-w-2xl mx-auto leading-relaxed mb-4">
+            AI-POWERED DATABASE MIGRATION
+          </p>
+          <p className="text-lg text-brutal-gray-dark max-w-xl mx-auto leading-relaxed">
+            PostgreSQL → MongoDB
             <br />
-            Clone your repo, analyze the code, transform everything.
+            Clone • Analyze • Transform
           </p>
 
           {/* Feature pills */}
-          <div className="flex flex-wrap justify-center gap-3 mt-8">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--glass-frosted)] border border-[var(--glass-border-subtle)] text-sm text-[var(--text-secondary)]">
-              <Zap className="w-4 h-4 text-[var(--accent-cyan)]" />
+          <div className="flex flex-wrap justify-center gap-4 mt-10">
+            <div className="flex items-center gap-2 px-5 py-3 border-3 border-brutal-black dark:border-brutal-white bg-card font-bold text-sm uppercase shadow-brutal-sm">
+              <Zap className="w-5 h-5" strokeWidth={2.5} />
               AI Agents
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--glass-frosted)] border border-[var(--glass-border-subtle)] text-sm text-[var(--text-secondary)]">
-              <GitBranch className="w-4 h-4 text-[var(--accent-purple)]" />
-              Auto PR Creation
+            <div className="flex items-center gap-2 px-5 py-3 border-3 border-brutal-black dark:border-brutal-white bg-card font-bold text-sm uppercase shadow-brutal-sm">
+              <GitBranch className="w-5 h-5" strokeWidth={2.5} />
+              Auto PR
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--glass-frosted)] border border-[var(--glass-border-subtle)] text-sm text-[var(--text-secondary)]">
-              <ArrowRight className="w-4 h-4 text-[var(--accent-pink)]" />
+            <div className="flex items-center gap-2 px-5 py-3 border-3 border-brutal-black dark:border-brutal-white bg-card font-bold text-sm uppercase shadow-brutal-sm">
+              <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
               Code + Data
             </div>
           </div>
         </div>
 
         {/* Create Button */}
-        <div className="flex justify-center mb-12">
+        <div className="flex justify-center mb-16">
           <button
             onClick={() => setIsCreateOpen(true)}
-            className="relative group flex items-center gap-3 px-8 py-4 rounded-2xl text-lg font-medium text-white overflow-hidden transition-all"
+            className="brutal-btn-primary flex items-center gap-3 text-lg"
           >
-            {/* Glow */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent-purple)] via-[var(--accent-cyan)] to-[var(--accent-pink)] opacity-80 group-hover:opacity-100 transition-opacity" />
-            <div className="absolute -inset-1 bg-gradient-to-r from-[var(--accent-purple)] via-[var(--accent-cyan)] to-[var(--accent-pink)] opacity-0 group-hover:opacity-50 blur-xl transition-opacity" />
-            <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent" />
-
-            <div className="relative flex items-center gap-2">
-              <Plus className="w-5 h-5" />
-              New Migration
-            </div>
+            <Plus className="w-6 h-6" strokeWidth={3} />
+            New Migration
           </button>
         </div>
 
@@ -173,45 +162,38 @@ export default function HomePage() {
             {[...Array(3)].map((_, i) => (
               <div
                 key={i}
-                className="project-card h-48 animate-pulse"
+                className="brutal-card h-48 animate-pulse-slow"
               >
                 <div className="h-full flex flex-col justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-xl bg-[var(--glass-light)]" />
+                    <div className="w-12 h-12 bg-brutal-gray-light border-2 border-brutal-black dark:border-brutal-white" />
                     <div className="space-y-2">
-                      <div className="h-4 w-24 bg-[var(--glass-light)] rounded" />
-                      <div className="h-3 w-16 bg-[var(--glass-light)] rounded" />
+                      <div className="h-4 w-24 bg-brutal-gray-light border-2 border-brutal-black dark:border-brutal-white" />
+                      <div className="h-3 w-16 bg-brutal-gray-light border-2 border-brutal-black dark:border-brutal-white" />
                     </div>
                   </div>
-                  <div className="h-8 w-full bg-[var(--glass-light)] rounded-lg" />
+                  <div className="h-8 w-full bg-brutal-gray-light border-2 border-brutal-black dark:border-brutal-white" />
                 </div>
               </div>
             ))}
           </div>
         ) : migrations.length === 0 ? (
-          <div className="liquid-glass text-center py-20 max-w-lg mx-auto">
-            <div className="relative w-20 h-20 mx-auto mb-6">
-              <div className="absolute inset-0 rounded-2xl bg-[var(--accent-purple)] opacity-20 blur-xl" />
-              <div className="relative w-20 h-20 rounded-2xl bg-[var(--glass-medium)] flex items-center justify-center border border-[var(--glass-border-subtle)]">
-                <Database className="w-9 h-9 text-[var(--text-quaternary)]" />
-              </div>
+          <div className="brutal-card text-center py-16 max-w-lg mx-auto">
+            <div className="relative w-20 h-20 mx-auto mb-6 bg-brutal-gray-light border-3 border-brutal-black dark:border-brutal-white flex items-center justify-center">
+              <Database className="w-10 h-10 text-brutal-gray-dark" strokeWidth={2.5} />
             </div>
-            <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
-              No migrations yet
+            <h3 className="text-2xl font-black uppercase mb-3">
+              No Migrations Yet
             </h3>
-            <p className="text-[var(--text-secondary)] mb-8">
+            <p className="text-brutal-gray-dark font-bold mb-8">
               Create your first migration to get started
             </p>
             <button
               onClick={() => setIsCreateOpen(true)}
-              className="relative group inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium text-white overflow-hidden transition-all"
+              className="brutal-btn-primary inline-flex items-center gap-2"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent-purple)] to-[var(--accent-cyan)] opacity-80 group-hover:opacity-100 transition-opacity" />
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent" />
-              <div className="relative flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                Create Migration
-              </div>
+              <Plus className="w-5 h-5" strokeWidth={3} />
+              Create Migration
             </button>
           </div>
         ) : (
@@ -235,13 +217,13 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[var(--glass-border-subtle)] py-6 bg-[var(--glass-frosted)]">
+      <footer className="border-t-4 border-brutal-black dark:border-brutal-white py-8 bg-card mt-12">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-sm text-[var(--text-tertiary)]">
+          <p className="text-sm font-bold uppercase tracking-wide text-brutal-gray-dark">
             Powered by{" "}
-            <span className="text-[var(--accent-purple)]">Claude Code</span>
-            {" "}&middot;{" "}
-            <span className="text-[var(--accent-cyan)]">MongoDB MCP</span>
+            <span className="text-foreground">Claude</span>
+            {" "}•{" "}
+            <span className="text-mongodb-green-dark">MongoDB</span>
           </p>
         </div>
       </footer>

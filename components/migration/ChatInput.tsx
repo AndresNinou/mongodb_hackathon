@@ -1,40 +1,33 @@
 "use client";
 
 import { useState, useRef, KeyboardEvent } from "react";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, Square } from "lucide-react";
 
 interface ChatInputProps {
-  onSend: (message: string) => Promise<void>;
+  onSend: (message: string) => void;
+  onStop?: () => void;
   disabled?: boolean;
+  isStreaming?: boolean;
   placeholder?: string;
 }
 
 export function ChatInput({
   onSend,
+  onStop,
   disabled = false,
+  isStreaming = false,
   placeholder = "Send a message to the agent...",
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
-  const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleSend = async () => {
+  const handleSend = () => {
     const trimmed = message.trim();
-    if (!trimmed || isSending || disabled) return;
+    if (!trimmed || disabled || isStreaming) return;
 
-    setIsSending(true);
+    onSend(trimmed);
     setMessage("");
-
-    try {
-      await onSend(trimmed);
-    } catch (error) {
-      console.error("[ChatInput] Send error:", error);
-      // Restore message on error
-      setMessage(trimmed);
-    } finally {
-      setIsSending(false);
-      textareaRef.current?.focus();
-    }
+    textareaRef.current?.focus();
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -53,7 +46,7 @@ export function ChatInput({
     }
   };
 
-  const isDisabled = disabled || isSending;
+  const isDisabled = disabled && !isStreaming;
 
   return (
     <div className="border-t border-[var(--glass-border-subtle)] bg-[var(--glass-frosted)] p-4">
@@ -76,38 +69,50 @@ export function ChatInput({
           }}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          disabled={isDisabled}
+          disabled={isDisabled || isStreaming}
           rows={1}
           className={`
             flex-1 bg-transparent border-none outline-none resize-none
             text-sm text-[var(--text-primary)] placeholder-[var(--text-quaternary)]
             min-h-[24px] max-h-[150px]
-            ${isDisabled ? "cursor-not-allowed" : ""}
+            ${isDisabled || isStreaming ? "cursor-not-allowed" : ""}
           `}
         />
 
-        <button
-          onClick={handleSend}
-          disabled={isDisabled || !message.trim()}
-          className={`
-            flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center
-            transition-all
-            ${message.trim() && !isDisabled
-              ? "bg-gradient-to-r from-[var(--accent-purple)] to-[var(--accent-cyan)] text-white hover:opacity-90"
-              : "bg-[var(--glass-dark)] text-[var(--text-quaternary)]"
-            }
-            ${isDisabled ? "cursor-not-allowed" : "cursor-pointer"}
-          `}
-        >
-          {isSending ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Send className="w-4 h-4" />
-          )}
-        </button>
+        {/* Stop button when streaming */}
+        {isStreaming && onStop ? (
+          <button
+            onClick={onStop}
+            className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center
+              bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all cursor-pointer"
+            title="Stop generating"
+          >
+            <Square className="w-4 h-4 fill-current" />
+          </button>
+        ) : (
+          <button
+            onClick={handleSend}
+            disabled={isDisabled || !message.trim() || isStreaming}
+            className={`
+              flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center
+              transition-all
+              ${message.trim() && !isDisabled && !isStreaming
+                ? "bg-gradient-to-r from-[var(--accent-purple)] to-[var(--accent-cyan)] text-white hover:opacity-90"
+                : "bg-[var(--glass-dark)] text-[var(--text-quaternary)]"
+              }
+              ${isDisabled || isStreaming ? "cursor-not-allowed" : "cursor-pointer"}
+            `}
+          >
+            {isStreaming ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Send className="w-4 h-4" />
+            )}
+          </button>
+        )}
       </div>
 
-      {disabled && (
+      {disabled && !isStreaming && (
         <div className="text-xs text-[var(--text-quaternary)] text-center mt-2">
           Chat available when agent is active
         </div>

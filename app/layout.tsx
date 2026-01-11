@@ -4,8 +4,8 @@ import { inter } from "./fonts";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 export const metadata: Metadata = {
-  title: "PG2Mongo - Database Migration",
-  description: "Build beautiful web applications with AI assistance",
+  title: "Mongrate - AI-Powered Database Migration",
+  description: "PostgreSQL to MongoDB migration powered by AI. Clone, analyze, and transform your database with automated code generation.",
 };
 
 export default function RootLayout({
@@ -15,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body className="bg-mesh min-h-screen">
+      <body>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

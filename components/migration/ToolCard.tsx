@@ -1,21 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Check, X, Loader2 } from "lucide-react";
-
-// Tool icon mapping
-const TOOL_ICONS: Record<string, string> = {
-  Read: "docs",
-  Bash: "terminal",
-  Grep: "search",
-  Glob: "folder-search",
-  Edit: "edit",
-  Write: "file-plus",
-  Task: "cpu",
-  WebFetch: "globe",
-  WebSearch: "search-globe",
-  default: "tool",
-};
+import {
+  ChevronDown,
+  ChevronUp,
+  Check,
+  X,
+  Loader2,
+  FileText,
+  Terminal,
+  Search,
+  FileEdit,
+  FilePlus,
+  Cpu,
+  Globe,
+} from "lucide-react";
 
 interface ToolCardProps {
   id: string;
@@ -26,8 +25,21 @@ interface ToolCardProps {
   error?: string;
 }
 
+// Get tool icon component based on name
+function getToolIcon(toolName: string) {
+  const name = toolName.toLowerCase();
+  if (name.includes("read")) return FileText;
+  if (name.includes("bash")) return Terminal;
+  if (name.includes("grep") || name.includes("search") || name.includes("glob"))
+    return Search;
+  if (name.includes("edit")) return FileEdit;
+  if (name.includes("write")) return FilePlus;
+  if (name.includes("task")) return Cpu;
+  if (name.includes("web")) return Globe;
+  return Terminal;
+}
+
 export function ToolCard({
-  id,
   name,
   args,
   status,
@@ -35,6 +47,7 @@ export function ToolCard({
   error,
 }: ToolCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const ToolIcon = getToolIcon(name);
 
   // Format args for display
   const formatArgs = (args: Record<string, unknown>): string => {
@@ -59,20 +72,6 @@ export function ToolCard({
     return <X className="w-4 h-4 text-red-400" />;
   };
 
-  // Get tool icon based on name
-  const getToolEmoji = (toolName: string): string => {
-    const name = toolName.toLowerCase();
-    if (name.includes("read")) return "doc.text";
-    if (name.includes("bash")) return "terminal.fill";
-    if (name.includes("grep") || name.includes("search")) return "magnifyingglass";
-    if (name.includes("glob")) return "folder.fill.badge.gearshape";
-    if (name.includes("edit")) return "pencil";
-    if (name.includes("write")) return "doc.badge.plus";
-    if (name.includes("task")) return "cpu";
-    if (name.includes("web")) return "globe";
-    return "wrench.and.screwdriver";
-  };
-
   return (
     <div
       className={`
@@ -89,16 +88,7 @@ export function ToolCard({
       >
         {/* Tool icon */}
         <div className="w-8 h-8 rounded-lg bg-[var(--glass-medium)] flex items-center justify-center">
-          <span className="text-lg">
-            {name.includes("Read") && "reading"}
-            {name.includes("Bash") && "terminal"}
-            {name.includes("Grep") && "search"}
-            {name.includes("Edit") && "edit"}
-            {name.includes("Write") && "write"}
-            {!["Read", "Bash", "Grep", "Edit", "Write"].some((t) =>
-              name.includes(t)
-            ) && "tool"}
-          </span>
+          <ToolIcon className="w-4 h-4 text-[var(--accent-cyan)]" />
         </div>
 
         {/* Tool name and preview */}
