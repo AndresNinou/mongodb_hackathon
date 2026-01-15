@@ -7,11 +7,17 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
-  FileCode,
-  Table,
   ArrowRight,
+  Brain,
+  Hammer,
 } from "lucide-react";
 import type { MigrationResponse, MigrationStatus } from "@/types";
+
+// Agent name mapping
+const AGENT_NAMES: Record<number, { name: string; icon: typeof Brain }> = {
+  1: { name: "Planner", icon: Brain },
+  2: { name: "Builder", icon: Hammer },
+};
 
 interface MigrationInfoPanelProps {
   migration: MigrationResponse;
@@ -42,12 +48,6 @@ export function MigrationInfoPanel({
   const agent = currentAgent !== undefined ? currentAgent : migration.currentAgent;
   const statusConfig = STATUS_CONFIG[status];
   const StatusIcon = statusConfig.icon;
-
-  // Parse plan if available
-  const plan = migration.plan;
-  const planTables = plan?.tables as { name: string; collection: string }[] | undefined;
-  const planSummary = plan?.summary as string | undefined;
-  const rawOutput = plan?.raw_output as string | undefined;
 
   // Get recent logs (last 5)
   const recentLogs = migration.logs.slice(-5).reverse();
@@ -102,8 +102,17 @@ export function MigrationInfoPanel({
               {statusConfig.label}
             </div>
             {agent && (
-              <div className="text-xs text-[var(--text-tertiary)]">
-                Agent {agent} active
+              <div className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)]">
+                {(() => {
+                  const agentInfo = AGENT_NAMES[agent];
+                  const AgentIcon = agentInfo?.icon || Brain;
+                  return (
+                    <>
+                      <AgentIcon className="w-3 h-3" />
+                      <span>{agentInfo?.name || `Agent ${agent}`} active</span>
+                    </>
+                  );
+                })()}
               </div>
             )}
           </div>
@@ -142,57 +151,6 @@ export function MigrationInfoPanel({
           )}
         </div>
       </div>
-
-      {/* Plan Preview */}
-      {plan && (
-        <div className="rounded-xl border border-[var(--glass-border-subtle)] bg-[var(--glass-frosted)] p-4">
-          <h3 className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-3">
-            Migration Plan
-          </h3>
-
-          {planSummary && (
-            <p className="text-sm text-[var(--text-secondary)] mb-3">
-              {planSummary}
-            </p>
-          )}
-
-          {planTables && planTables.length > 0 && (
-            <div className="space-y-2">
-              <div className="text-xs text-[var(--text-tertiary)]">
-                Tables to migrate:
-              </div>
-              {planTables.slice(0, 5).map((table, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-2 text-sm bg-[var(--glass-dark)] rounded-lg px-3 py-2"
-                >
-                  <Table className="w-4 h-4 text-blue-400" />
-                  <span className="text-[var(--text-secondary)]">
-                    {table.name}
-                  </span>
-                  <ArrowRight className="w-3 h-3 text-[var(--text-quaternary)]" />
-                  <FileCode className="w-4 h-4 text-green-400" />
-                  <span className="text-[var(--text-secondary)]">
-                    {table.collection}
-                  </span>
-                </div>
-              ))}
-              {planTables.length > 5 && (
-                <div className="text-xs text-[var(--text-tertiary)] text-center">
-                  +{planTables.length - 5} more tables
-                </div>
-              )}
-            </div>
-          )}
-
-          {rawOutput && !planTables && (
-            <pre className="text-xs text-[var(--text-tertiary)] bg-[var(--glass-dark)] rounded-lg p-3 overflow-x-auto max-h-40">
-              {rawOutput.slice(0, 500)}
-              {rawOutput.length > 500 && "..."}
-            </pre>
-          )}
-        </div>
-      )}
 
       {/* Result */}
       {migration.result && (
@@ -259,8 +217,17 @@ export function MigrationInfoPanel({
                     {new Date(log.timestamp).toLocaleTimeString()}
                   </span>
                   {log.agent && (
-                    <span className="px-1.5 py-0.5 rounded bg-[var(--glass-medium)] text-[var(--text-tertiary)]">
-                      Agent {log.agent}
+                    <span className="px-1.5 py-0.5 rounded bg-[var(--glass-medium)] text-[var(--text-tertiary)] flex items-center gap-1">
+                      {(() => {
+                        const agentInfo = AGENT_NAMES[log.agent];
+                        const AgentIcon = agentInfo?.icon || Brain;
+                        return (
+                          <>
+                            <AgentIcon className="w-3 h-3" />
+                            {agentInfo?.name || `Agent ${log.agent}`}
+                          </>
+                        );
+                      })()}
                     </span>
                   )}
                   <span

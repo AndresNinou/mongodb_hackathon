@@ -10,7 +10,7 @@ import {
   FileCode,
   FileJson,
   FileType,
-  Image,
+  Image as ImageIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -46,7 +46,7 @@ function getFileIcon(name: string) {
     case "jpeg":
     case "svg":
     case "gif":
-      return <Image className="w-4 h-4 text-[var(--accent-green)]" />;
+      return <ImageIcon className="w-4 h-4 text-[var(--accent-green)]" />;
     default:
       return <File className="w-4 h-4 text-[var(--text-tertiary)]" />;
   }

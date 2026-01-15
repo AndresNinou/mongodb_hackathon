@@ -32,12 +32,35 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
+    // Resolve MongoDB URL - use default from env or provided value
+    const mongoUrl = body.config?.useDefaultMongo !== false
+      ? process.env.MONGODB_URI
+      : body.config?.mongoUrl || process.env.MONGODB_URI;
+
+    // Resolve GitHub token - use default from env or provided value
+    const githubToken = body.config?.useDefaultGithub !== false
+      ? process.env.GITHUB_TOKEN
+      : body.config?.githubToken || process.env.GITHUB_TOKEN;
+
+    // Resolve Supabase config - use default from env or provided value
+    const supabase = body.config?.useDefaultSupabase !== false
+      ? {
+          url: process.env.SUPABASE_URL || "",
+          projectId: process.env.SUPABASE_PROJECT_ID || "",
+          anonKey: process.env.SUPABASE_ANON_KEY || "",
+        }
+      : body.config?.supabase || {
+          url: process.env.SUPABASE_URL || "",
+          projectId: process.env.SUPABASE_PROJECT_ID || "",
+          anonKey: process.env.SUPABASE_ANON_KEY || "",
+        };
+
     // Validate required fields
-    if (!body.name || !body.config?.repoUrl || !body.config?.mongoUrl) {
+    if (!body.name || !body.config?.repoUrl || !mongoUrl) {
       return NextResponse.json(
         {
           success: false,
-          error: "Missing required fields: name, config.repoUrl, config.mongoUrl",
+          error: "Missing required fields: name, config.repoUrl, config.mongoUrl (or MONGODB_URI env)",
         },
         { status: 400 }
       );
@@ -48,9 +71,9 @@ export async function POST(request: Request) {
       config: {
         repoUrl: body.config.repoUrl,
         branch: body.config.branch || "main",
-        postgresUrl: body.config.postgresUrl,
-        mongoUrl: body.config.mongoUrl,
-        githubToken: body.config.githubToken,
+        supabase: supabase,
+        mongoUrl: mongoUrl,
+        githubToken: githubToken,
       },
     };
 

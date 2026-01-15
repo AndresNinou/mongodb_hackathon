@@ -37,7 +37,7 @@ export async function POST(request: Request, { params }: RouteContext) {
 
     const provider = createACPProvider({
       command: NPX_PATH,
-      args: ["-y", "@anthropics/claude-code", "--acp"],
+      args: ["-y", "@zed-industries/claude-code-acp"],
       persistSession: true,
       existingSessionId: migration.sessionId,
       session: {

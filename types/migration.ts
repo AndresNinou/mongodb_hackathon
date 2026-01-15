@@ -9,10 +9,17 @@ export type MigrationStatus =
   | "completed"
   | "failed";
 
+export interface SupabaseConfig {
+  url: string;
+  projectId: string;
+  anonKey: string;
+}
+
 export interface MigrationConfig {
   repoUrl: string;
   branch?: string;
-  postgresUrl?: string;
+  postgresUrl?: string; // Legacy, kept for backward compatibility
+  supabase?: SupabaseConfig; // New Supabase configuration
   mongoUrl: string;
   githubToken?: string;
 }
@@ -22,6 +29,21 @@ export interface MigrationLog {
   agent: 1 | 2 | null;
   level: "info" | "warn" | "error";
   message: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
+  agent?: 1 | 2 | null;
+  tools?: Array<{
+    id: string;
+    name: string;
+    args: Record<string, unknown>;
+    status: "running" | "completed" | "failed";
+    output?: string;
+  }>;
 }
 
 export interface MigrationResult {
@@ -53,6 +75,7 @@ export interface Migration {
   currentAgent: 1 | 2 | null;
   result?: MigrationResult;
   logs: MigrationLog[];
+  chatMessages?: ChatMessage[]; // Persisted chat history
   repoPath?: string;
   sessionId?: string; // ACP session ID for interactive chat
   createdAt: Date;

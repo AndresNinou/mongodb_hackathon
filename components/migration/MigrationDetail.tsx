@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   X,
   Play,
@@ -8,10 +8,13 @@ import {
   GitBranch,
   Loader2,
   ArrowRight,
+  MessageSquare,
+  FileText,
 } from "lucide-react";
 import { AgentChatPanel } from "./AgentChatPanel";
 import { MigrationInfoPanel } from "./MigrationInfoPanel";
-import type { MigrationResponse, MigrationStatus } from "@/types";
+import { PlanViewer } from "./PlanViewer";
+import type { MigrationResponse } from "@/types";
 
 interface MigrationDetailProps {
   migration: MigrationResponse;
@@ -26,8 +29,40 @@ export function MigrationDetail({
 }: MigrationDetailProps) {
   const [isStartingPlan, setIsStartingPlan] = useState(false);
   const [isStartingExecution, setIsStartingExecution] = useState(false);
-  const [currentStatus, setCurrentStatus] = useState<MigrationStatus>(migration.status);
-  const [currentAgent, setCurrentAgent] = useState<1 | 2 | null>(migration.currentAgent);
+  const [activeTab, setActiveTab] = useState<"chat" | "plan">("chat");
+  const [isPlanExpanded, setIsPlanExpanded] = useState(true);
+  const hasAutoSwitchedToPlanRef = useRef(migration.status === "plan_ready" || migration.status === "completed");
+
+  // Use migration prop directly for status (it gets updated from parent)
+  const currentStatus = migration.status;
+  const currentAgent = migration.currentAgent;
+
+  // Subscribe to SSE stream to detect status changes and refresh
+  useEffect(() => {
+    const eventSource = new EventSource(`/api/migrations/${migration.migrationId}/stream`);
+
+    eventSource.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        // When status changes to plan_ready or completed, refresh data
+        if (message.type === "status" && (message.status === "plan_ready" || message.status === "completed")) {
+          onRefresh();
+          // Only auto-switch to plan tab ONCE
+          if (message.status === "plan_ready" && !hasAutoSwitchedToPlanRef.current) {
+            hasAutoSwitchedToPlanRef.current = true;
+            setActiveTab("plan");
+          }
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    };
+
+    return () => eventSource.close();
+  }, [migration.migrationId, onRefresh]);
+
+  // Check if we have a plan
+  const hasPlan = Boolean(migration.plan);
 
   const startPlanning = async () => {
     setIsStartingPlan(true);
@@ -138,9 +173,61 @@ export function MigrationDetail({
 
         {/* Split View Content */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Left Panel - Agent Chat (60%) */}
+          {/* Left Panel - Tabs (60%) */}
           <div className="w-3/5 flex flex-col border-r border-[var(--glass-border-subtle)]">
-            <AgentChatPanel migrationId={migration.migrationId} />
+            {/* Tab Header */}
+            <div className="flex border-b border-[var(--glass-border-subtle)] bg-[var(--glass-dark)]">
+              <button
+                onClick={() => setActiveTab("chat")}
+                className={`
+                  flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all relative
+                  ${activeTab === "chat"
+                    ? "text-[var(--accent-cyan)]"
+                    : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+                  }
+                `}
+              >
+                <MessageSquare className="w-4 h-4" />
+                Agent Chat
+                {activeTab === "chat" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[var(--accent-cyan)] to-[var(--accent-purple)]" />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab("plan")}
+                className={`
+                  flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all relative
+                  ${activeTab === "plan"
+                    ? "text-[var(--accent-cyan)]"
+                    : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+                  }
+                `}
+              >
+                <FileText className="w-4 h-4" />
+                Migration Plan
+                {hasPlan && (
+                  <span className="ml-1 w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                )}
+                {activeTab === "plan" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[var(--accent-cyan)] to-[var(--accent-purple)]" />
+                )}
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="flex-1 overflow-hidden">
+              {activeTab === "chat" ? (
+                <AgentChatPanel migrationId={migration.migrationId} />
+              ) : (
+                <div className="h-full overflow-y-auto p-4">
+                  <PlanViewer
+                    plan={migration.plan ?? null}
+                    isExpanded={isPlanExpanded}
+                    onToggleExpand={() => setIsPlanExpanded(!isPlanExpanded)}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right Panel - Migration Info (40%) */}

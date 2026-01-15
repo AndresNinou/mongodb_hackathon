@@ -370,6 +370,11 @@
     to { opacity: 1; }
   }
 
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   .animate-slide-up {
     animation: slide-up 0.3s ease-out;
   }
@@ -392,6 +397,31 @@
   @keyframes pulse-slow {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
+  }
+
+  /* Shimmer animation for tool cards */
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  /* Glow pulse animation */
+  @keyframes glow-pulse {
+    0%, 100% {
+      box-shadow: 0 0 5px rgba(6, 182, 212, 0.3), 0 0 10px rgba(6, 182, 212, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.5), 0 0 25px rgba(6, 182, 212, 0.3);
+    }
+  }
+
+  .animate-glow-pulse {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+
+  /* Tool card running state */
+  .tool-card-running {
+    animation: glow-pulse 2s ease-in-out infinite;
   }
 }
 
@@ -500,4 +530,48 @@ html {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Mermaid diagram styles */
+.mermaid-diagram {
+  @apply my-4 p-4 rounded-xl overflow-x-auto;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(139, 92, 246, 0.05));
+  border: 1px solid var(--glass-border-subtle);
+}
+
+.mermaid-diagram svg {
+  @apply mx-auto;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Plan viewer code blocks */
+.prose pre {
+  @apply relative;
+}
+
+.prose pre::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+  border-radius: 4px 4px 0 0;
+}
+
+/* Table styles for plan viewer */
+.prose table {
+  @apply w-full my-4;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.prose thead tr {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(139, 92, 246, 0.1));
+}
+
+.prose tbody tr:hover {
+  background: rgba(6, 182, 212, 0.05);
 }
